@@ -1,0 +1,6 @@
+groq
+python-dotenv
+duckduckgo_search
+pandas
+langchain
+langgraph
