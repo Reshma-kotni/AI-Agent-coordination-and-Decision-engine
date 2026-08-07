@@ -8,9 +8,9 @@ Research Brief:
 === Research Brief ===
 
 Query 1: Audit the latest vendor contract for procurement risk and summarize required review steps. [ENRICHED: Expand research sc
-  [1] Useful inputs include vendor profiles, risk evidence, contracts, services, spend, and review history. A well-scoped public sector procurement software approach can connect these inputs to a practical plan.
-  [2] Effects of COVID-19 pandemic on hospitality industry: a review of the current...
-  [3] The regulations will build in reasonable steps when developing procurements and contracts, during the contract award stage and throughout the contract term. These regulations are new and signify an important step to ensuring NHS supply chains are free from modern slavery.
+  [1] Jun 22, 2026 · A vendor contract review checklist helps procurement, legal, finance, security, and operations teams identify supplier risk before a contract is signed. It should cover price, term, renewal, data use, service quality, liability, termination, audit rights, security obligations, and exit support.
+  [2] By following a clear audit checklist, teams can identify process gaps early, reduce risks, and improve how procurement functions across the business.
+  [3] Jun 22, 2026 · A vendor contract risk checklist helps legal and procurement teams identify those issues early, review contracts consistently, and prioritise the agreements that need negotiation or escalation.
 
 
 Analysis:

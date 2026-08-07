@@ -105,6 +105,34 @@
         "executor",
         "evaluator"
       ]
+    },
+    {
+      "date": "2026-08-07",
+      "task": "Audit the latest vendor contract for procurement risk and summarize required review steps. [ENRICHED: Expand research scope. Focus on regulatory compliance, vendor risk history, and industry benchmarks.]",
+      "vendor_name": "",
+      "risk_level": "LOW",
+      "validation_status": "UNKNOWN",
+      "summary": "Analyzer failed: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}",
+      "tool_errors": [
+        "tool_router: LLM parse failed (Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}). Used heuristic fallback.",
+        "VendorRiskApiTool: no 'vendor_name' found in state."
+      ],
+      "node_history": [
+        "memory_manager_pre",
+        "planner",
+        "tool_router",
+        "run_tools",
+        "research_agent",
+        "analyzer",
+        "re_planner",
+        "research_agent",
+        "analyzer",
+        "review",
+        "error_recovery",
+        "decision",
+        "executor",
+        "evaluator"
+      ]
     }
   ],
   "vendor_profiles": {},

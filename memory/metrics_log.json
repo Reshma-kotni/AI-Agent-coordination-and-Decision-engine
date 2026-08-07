@@ -94,5 +94,53 @@
     "conditional_path": "standard_audit",
     "re_plan_triggered": true,
     "research_queries_run": 1
+  },
+  {
+    "timestamp": "2026-08-07T11:47:22.133720+00:00",
+    "task": "Audit the latest vendor contract for procurement risk and summarize required review steps. [ENRICHED: Expand research sc",
+    "vendor_name": "",
+    "total_duration_s": 7.1605,
+    "node_timings_s": {
+      "memory_pre": 0.02,
+      "planner": 0.4917,
+      "tool_router": 0.1857,
+      "run_tools": 0.0001,
+      "research_agent": 1.5383,
+      "analyzer": 0.106,
+      "re_planner": 0.0,
+      "review": 0.0001,
+      "error_recovery": 0.271,
+      "decision": 0.1821,
+      "executor": 0.0014,
+      "evaluator": 0.0001
+    },
+    "nodes_visited": [
+      "memory_manager_pre",
+      "planner",
+      "tool_router",
+      "run_tools",
+      "research_agent",
+      "analyzer",
+      "re_planner",
+      "research_agent",
+      "analyzer",
+      "review",
+      "error_recovery",
+      "decision",
+      "executor",
+      "evaluator",
+      "memory_manager_post"
+    ],
+    "tools_invoked": [
+      "vendor_risk_api"
+    ],
+    "tool_error_count": 2,
+    "validation_status": "UNKNOWN",
+    "audit_score": 28,
+    "audit_quality_band": "POOR",
+    "risk_level": "Unknown",
+    "conditional_path": "standard_audit",
+    "re_plan_triggered": true,
+    "research_queries_run": 1
   }
 ]
