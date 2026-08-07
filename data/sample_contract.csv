@@ -1,0 +1,11 @@
+vendor_name,contract_id,contract_value,start_date,end_date,risk_level,compliance_status,payment_terms,termination_clause,sla_penalty_pct,indemnity_cap,data_protection,ip_ownership,jurisdiction,auto_renewal
+Acme Corp,CNT-2024-001,250000,2024-01-15,2026-01-14,Low,Compliant,Net 30,90 days notice,10,500000,GDPR Compliant,Client owns all deliverables,New York,Yes
+Globex Ltd,CNT-2024-002,780000,2024-03-01,2025-12-31,High,Under Review,Net 60,60 days notice,15,1000000,Non-compliant — pending DPA,Vendor retains IP,London,No
+Initech Solutions,CNT-2024-003,150000,2023-06-01,2025-06-01,Critical,Non-Compliant,Net 45,30 days notice,5,150000,No DPA in place,Shared ownership — ambiguous,Mumbai,Yes
+Umbrella Technologies,CNT-2024-004,1200000,2024-07-01,2027-06-30,Medium,Compliant,Net 30,120 days notice,12,2000000,GDPR & CCPA Compliant,Work for hire — client owns,San Francisco,Yes
+Stark Industries,CNT-2024-005,450000,2024-02-15,2026-02-14,Low,Compliant,Net 30,90 days notice,8,900000,GDPR Compliant,Client owns all deliverables,Berlin,No
+Wayne Enterprises,CNT-2024-006,950000,2024-04-01,2026-03-31,Medium,Under Review,Net 45,60 days notice,10,1500000,CCPA Compliant — GDPR pending,Joint ownership with license-back,Chicago,Yes
+Oscorp Solutions,CNT-2024-007,320000,2023-09-01,2025-08-31,High,Non-Compliant,Net 60,30 days notice,20,320000,No data protection clause,Vendor retains all IP,Singapore,No
+Cyberdyne Systems,CNT-2024-008,2100000,2024-06-01,2027-05-31,Critical,Non-Compliant,Net 90,180 days notice,3,5000000,Partial GDPR — missing Article 28,Work for hire,Tokyo,Yes
+Soylent Corp,CNT-2024-009,85000,2024-01-01,2024-12-31,Low,Compliant,Net 15,30 days notice,10,85000,GDPR Compliant,Client owns all deliverables,Amsterdam,No
+Weyland Industries,CNT-2024-010,1750000,2024-08-01,2027-07-31,High,Under Review,Net 60,90 days notice,15,3000000,GDPR non-compliant — active breach investigation,Disputed — under litigation,Delaware,Yes

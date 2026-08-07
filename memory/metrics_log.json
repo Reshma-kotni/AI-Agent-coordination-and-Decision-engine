@@ -1,0 +1,98 @@
+[
+  {
+    "timestamp": "2026-08-06T17:54:55.285957+00:00",
+    "task": "Audit the latest vendor contract for procurement risk and summarize required review steps. [ENRICHED: Expand research sc",
+    "vendor_name": "",
+    "total_duration_s": 8.4412,
+    "node_timings_s": {
+      "memory_pre": 0.0113,
+      "planner": 0.5248,
+      "tool_router": 0.2446,
+      "run_tools": 0.0002,
+      "research_agent": 2.86,
+      "analyzer": 0.0742,
+      "re_planner": 0.0,
+      "review": 0.0,
+      "error_recovery": 0.2361,
+      "decision": 0.2337,
+      "executor": 0.0012,
+      "evaluator": 0.0001
+    },
+    "nodes_visited": [
+      "memory_manager_pre",
+      "planner",
+      "tool_router",
+      "run_tools",
+      "research_agent",
+      "analyzer",
+      "re_planner",
+      "research_agent",
+      "analyzer",
+      "review",
+      "error_recovery",
+      "decision",
+      "executor",
+      "evaluator",
+      "memory_manager_post"
+    ],
+    "tools_invoked": [
+      "vendor_risk_api"
+    ],
+    "tool_error_count": 2,
+    "validation_status": "UNKNOWN",
+    "audit_score": 28,
+    "audit_quality_band": "POOR",
+    "risk_level": "Unknown",
+    "conditional_path": "standard_audit",
+    "re_plan_triggered": true,
+    "research_queries_run": 1
+  },
+  {
+    "timestamp": "2026-08-07T01:39:58.248498+00:00",
+    "task": "Audit the latest vendor contract for procurement risk and summarize required review steps. [ENRICHED: Expand research sc",
+    "vendor_name": "",
+    "total_duration_s": 8.2241,
+    "node_timings_s": {
+      "memory_pre": 0.0096,
+      "planner": 1.2207,
+      "tool_router": 0.1603,
+      "run_tools": 0.0001,
+      "research_agent": 1.3868,
+      "analyzer": 0.0491,
+      "re_planner": 0.0,
+      "review": 0.0,
+      "error_recovery": 0.1751,
+      "decision": 1.2369,
+      "executor": 0.001,
+      "evaluator": 0.0001
+    },
+    "nodes_visited": [
+      "memory_manager_pre",
+      "planner",
+      "tool_router",
+      "run_tools",
+      "research_agent",
+      "analyzer",
+      "re_planner",
+      "research_agent",
+      "analyzer",
+      "review",
+      "error_recovery",
+      "decision",
+      "executor",
+      "evaluator",
+      "memory_manager_post"
+    ],
+    "tools_invoked": [
+      "vendor_risk_api"
+    ],
+    "tool_error_count": 2,
+    "validation_status": "UNKNOWN",
+    "audit_score": 28,
+    "audit_quality_band": "POOR",
+    "risk_level": "Unknown",
+    "conditional_path": "standard_audit",
+    "re_plan_triggered": true,
+    "research_queries_run": 1
+  }
+]

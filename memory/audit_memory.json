@@ -1,0 +1,166 @@
+{
+  "_description": "Long-term audit knowledge store for the AI Agent Coordination & Decision Engine.",
+  "_version": "1.0",
+  "audit_records": [
+    {
+      "date": "2026-08-06",
+      "task": "Audit the latest vendor contract for procurement risk and summarize required review steps.",
+      "vendor_name": "",
+      "risk_level": "LOW",
+      "validation_status": "UNKNOWN",
+      "summary": "Analyzer failed: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}",
+      "tool_errors": [
+        "tool_router: LLM parse failed (Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}). Used heuristic fallback.",
+        "VendorRiskApiTool: no 'vendor_name' found in state."
+      ],
+      "node_history": [
+        "memory_manager_pre",
+        "planner",
+        "tool_router",
+        "run_tools",
+        "research_agent",
+        "analyzer",
+        "review",
+        "error_recovery",
+        "decision",
+        "executor"
+      ]
+    },
+    {
+      "date": "2026-08-06",
+      "task": "Audit the latest vendor contract for procurement risk and summarize required review steps.",
+      "vendor_name": "",
+      "risk_level": "LOW",
+      "validation_status": "UNKNOWN",
+      "summary": "Analyzer failed: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}",
+      "tool_errors": [
+        "tool_router: LLM parse failed (Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}). Used heuristic fallback.",
+        "VendorRiskApiTool: no 'vendor_name' found in state."
+      ],
+      "node_history": [
+        "memory_manager_pre",
+        "planner",
+        "tool_router",
+        "run_tools",
+        "research_agent",
+        "analyzer",
+        "review",
+        "error_recovery",
+        "decision",
+        "executor"
+      ]
+    },
+    {
+      "date": "2026-08-06",
+      "task": "Audit the latest vendor contract for procurement risk and summarize required review steps. [ENRICHED: Expand research scope. Focus on regulatory compliance, vendor risk history, and industry benchmarks.]",
+      "vendor_name": "",
+      "risk_level": "LOW",
+      "validation_status": "UNKNOWN",
+      "summary": "Analyzer failed: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}",
+      "tool_errors": [
+        "tool_router: LLM parse failed (Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}). Used heuristic fallback.",
+        "VendorRiskApiTool: no 'vendor_name' found in state."
+      ],
+      "node_history": [
+        "memory_manager_pre",
+        "planner",
+        "tool_router",
+        "run_tools",
+        "research_agent",
+        "analyzer",
+        "re_planner",
+        "research_agent",
+        "analyzer",
+        "review",
+        "error_recovery",
+        "decision",
+        "executor",
+        "evaluator"
+      ]
+    },
+    {
+      "date": "2026-08-07",
+      "task": "Audit the latest vendor contract for procurement risk and summarize required review steps. [ENRICHED: Expand research scope. Focus on regulatory compliance, vendor risk history, and industry benchmarks.]",
+      "vendor_name": "",
+      "risk_level": "LOW",
+      "validation_status": "UNKNOWN",
+      "summary": "Analyzer failed: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}",
+      "tool_errors": [
+        "tool_router: LLM parse failed (Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}). Used heuristic fallback.",
+        "VendorRiskApiTool: no 'vendor_name' found in state."
+      ],
+      "node_history": [
+        "memory_manager_pre",
+        "planner",
+        "tool_router",
+        "run_tools",
+        "research_agent",
+        "analyzer",
+        "re_planner",
+        "research_agent",
+        "analyzer",
+        "review",
+        "error_recovery",
+        "decision",
+        "executor",
+        "evaluator"
+      ]
+    }
+  ],
+  "vendor_profiles": {},
+  "known_risk_patterns": [
+    {
+      "pattern": "GDPR non-compliance",
+      "keywords": [
+        "gdpr",
+        "data protection",
+        "personal data",
+        "cookie"
+      ],
+      "severity": "HIGH",
+      "mitigation": "Request DPA (Data Processing Agreement) from vendor and verify Privacy Shield or SCCs."
+    },
+    {
+      "pattern": "Termination clause ambiguity",
+      "keywords": [
+        "termination",
+        "notice period",
+        "exit clause"
+      ],
+      "severity": "MEDIUM",
+      "mitigation": "Clarify notice periods and mutual termination rights with legal team."
+    },
+    {
+      "pattern": "Indemnity overreach",
+      "keywords": [
+        "indemnity",
+        "indemnification",
+        "hold harmless"
+      ],
+      "severity": "HIGH",
+      "mitigation": "Cap indemnity liability to contract value and exclude consequential damages."
+    },
+    {
+      "pattern": "SLA / performance penalty",
+      "keywords": [
+        "sla",
+        "service level",
+        "penalty",
+        "liquidated damages"
+      ],
+      "severity": "MEDIUM",
+      "mitigation": "Ensure penalty caps are reasonable (typically 10-15% of contract value)."
+    },
+    {
+      "pattern": "IP ownership dispute",
+      "keywords": [
+        "intellectual property",
+        "ip rights",
+        "ownership",
+        "work for hire"
+      ],
+      "severity": "HIGH",
+      "mitigation": "Confirm all deliverables are work-for-hire and IP transfers to client upon payment."
+    }
+  ]
+}

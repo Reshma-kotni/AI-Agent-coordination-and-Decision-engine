@@ -1,6 +1,11 @@
 groq
 python-dotenv
-duckduckgo_search
+ddgs
 pandas
 langchain
 langgraph
+pypdf
+langchain-groq
+fastapi
+uvicorn[standard]
+pytest

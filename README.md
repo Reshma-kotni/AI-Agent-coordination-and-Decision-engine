@@ -1,100 +1,177 @@
-# AI Agent Coordination and Decision Engines
+# 🤖 AI Agent Coordination & Decision Engine
 
-This repository contains a framework for multi-agent coordination and decision-making, designed specifically for complex tasks such as contract auditing and procurement risk analysis. The system leverages state management to pass context between specialized AI agents, orchestrating their workflow to produce actionable insights and detailed reports.
+A multi-agent AI system for **contract auditing and vendor risk analysis**, built with LangGraph, Groq (LLaMA), and FastAPI. Specialized agents collaborate through a state-driven orchestrator to parse contracts, assess risk, and deliver actionable decisions — all accessible via a REST API and interactive dashboard.
 
-## Features
+---
 
-- **Multi-Agent Architecture**: A modular system featuring specialized agents (Planner, Retriever, Analyzer, Decision, Review, Executor, Validator).
-- **State Management**: Uses an `AuditState` dictionary to pass state across agent nodes seamlessly.
-- **Dynamic Tool Invocation**: Integrates tools like `PandasAuditTool` dynamically based on the analyzer agent's output.
-- **Groq Integration**: Utilizes the powerful LLaMA models via the Groq API for rapid and efficient inference.
-- **Conditional Workflows**: Incorporates branching logic (e.g., standard audit vs. high-risk review) based on analysis.
-- **Automated Reporting**: Generates a comprehensive final report (`final_report.txt`) outlining the plan, retrieval, analysis, and decisions.
+## 📸 Dashboard Screenshots
 
-## Directory Structure
+### Overview
+Pipeline stats, quality distribution, and recent audit runs at a glance.
+
+![Overview Page](DOCS/overview_page.png)
+
+### Run Audit
+Submit audits with vendor name, PDF contract, and CSV data. Results include a score ring, dimension breakdown, and AI-generated analysis.
+
+![Run Audit Page](DOCS/run_audit_page.png)
+
+### Audit History
+Browse all completed audit runs with scores, durations, and status.
+
+![Audit History Page](DOCS/audit_history_page.png)
+
+### Vendors & Risk Patterns
+
+| Vendors | Risk Patterns |
+|---------|---------------|
+| ![Vendors](DOCS/vendors_page.png) | ![Risk Patterns](DOCS/risk_patterns_page.png) |
+
+---
+
+## 🏗️ Architecture
 
 ```
-.
-├── agents/
-│   ├── analyzer.py       # Analyzes the retrieved information
-│   ├── decision.py       # Makes decisions based on the analysis
-│   ├── executor.py       # Executes final tasks and generates reports
-│   ├── planner.py        # Plans the sequence of actions based on the task
-│   ├── prompt_templates.py # Contains prompts for different agents
-│   ├── retriever.py      # Retrieves relevant data for the task
-│   ├── review.py         # Performs risk review if conditionally required
-│   ├── tools.py          # Contains tools like PandasAuditTool
-│   └── validator.py      # Validates the final state/output
+User Request
+    │
+    ▼
+┌──────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐
+│ Planner  │───▶│ Retriever  │───▶│  Analyzer  │───▶│  Decision  │
+└──────────┘    └────────────┘    └────────────┘    └────────────┘
+                                                          │
+                                        ┌─────────────────┼─────────────┐
+                                        ▼                 ▼             ▼
+                                  ┌──────────┐    ┌────────────┐  ┌───────────┐
+                                  │  Review  │    │  Executor  │  │ Validator │
+                                  │(High Risk)│    └────────────┘  └───────────┘
+                                  └──────────┘
+```
+
+**Key Components:**
+
+| Component | Description |
+|-----------|-------------|
+| **Orchestrator** | LangGraph state machine coordinating all agents |
+| **Tool Router** | LLM-driven + heuristic fallback for tool selection |
+| **Memory Manager** | Short-term (audit) + long-term (vendor profiles) memory |
+| **Evaluator** | Scores outputs on accuracy, completeness, relevance |
+| **Research Agent** | Web search via DuckDuckGo for real-time context |
+
+**Integrated Tools:**
+
+| Tool | Input | Purpose |
+|------|-------|---------|
+| `PDFContractParserTool` | `.pdf` file path | Parse and chunk PDF contracts |
+| `PandasAuditTool` | `.csv` file path | Detect risk clauses in spreadsheet data |
+| `VendorRiskApiTool` | Vendor name | External vendor risk profile lookup |
+
+---
+
+## 📁 Project Structure
+
+```
+├── agents/               # All specialized agent modules
+│   ├── planner.py        # Task planning
+│   ├── retriever.py      # Data retrieval
+│   ├── analyzer.py       # Contract analysis
+│   ├── decision.py       # Decision making
+│   ├── review.py         # High-risk review
+│   ├── executor.py       # Report generation
+│   ├── validator.py      # Output validation
+│   ├── tools.py          # PDF, CSV, VRM tools
+│   ├── doc_parser.py     # PDF contract parser
+│   ├── vendor_api.py     # Vendor risk API client
+│   ├── research_agent.py # Web research agent
+│   ├── memory_manager.py # Memory management
+│   ├── evaluator.py      # Quality evaluation
+│   └── prompt_templates.py
 ├── workflows/
-│   └── Orchestrator.py   # Manages the state and coordinates agents
-├── main.py               # Main entry point to run the orchestrator
-├── requirements.txt      # Project dependencies
-├── test_orc.py           # Script for testing the orchestrator interactively
-└── test_planner.py       # Script for testing the Groq API connection and planner
+│   ├── Orchestrator.py   # LangGraph state machine
+│   └── metrics.py        # Pipeline metrics tracking
+├── api/
+│   └── app.py            # FastAPI server + dashboard
+├── dashboard/
+│   └── index.html        # Single-page dashboard UI
+├── memory/               # Persistent audit & vendor memory
+├── data/                 # Sample contracts (PDF, CSV)
+├── tests/                # Pytest suite (27 tests)
+├── main.py               # CLI entry point
+└── requirements.txt
 ```
 
-## Requirements
+---
 
-The project dependencies are listed in `requirements.txt`. They include:
+## 🚀 Quick Start
 
-- `groq`
-- `python-dotenv`
-- `duckduckgo_search`
-- `pandas`
-- `langchain`
-- `langgraph`
+### 1. Clone & Install
 
-## Setup Instructions
+```bash
+git clone https://github.com/Reshma-kotni/AI-Agent-coordination-and-Decision-engine.git
+cd AI-Agent-coordination-and-Decision-engine
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository_url>
-   cd ai-agent-coordination-and-decision-engines
-   ```
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
 
-2. **Create a virtual environment (optional but recommended):**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
+pip install -r requirements.txt
+```
 
-3. **Install the dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 2. Configure
 
-4. **Set up environment variables:**
-   Create a `.env` file in the root directory and add your Groq API key:
-   ```env
-   GROQ_API_KEY=your_groq_api_key_here
-   ```
+Create a `.env` file in the project root:
 
-## Usage
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
 
-You can run the default workflow by executing `main.py`:
+### 3. Run
 
+**CLI mode:**
 ```bash
 python main.py
 ```
 
-This will run an example task: *"Audit the latest vendor contract for procurement risk and summarize required review steps."*
+**API + Dashboard:**
+```bash
+uvicorn api.app:app --host 0.0.0.0 --port 8000 --reload
+```
+Then open **http://localhost:8000/dashboard/** in your browser.
 
-The orchestrator will trigger the sequence of agents and tools, print the outputs at each stage, and ultimately generate a `final_report.txt` in the root directory.
+---
 
-### Interactive Testing
+## 🔌 API Endpoints
 
-If you want to input a custom task, you can use the `test_orc.py` script:
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Health check |
+| `/audit` | POST | Run full audit pipeline |
+| `/report` | GET | Download `final_report.txt` |
+| `/history` | GET | All past audit records |
+| `/metrics` | GET | Aggregate pipeline stats |
+| `/vendors` | GET | All vendor profiles |
+| `/vendors/{name}` | GET | Specific vendor profile |
+| `/risk-patterns` | GET | Risk pattern library |
+| `/docs` | GET | Swagger UI |
+
+---
+
+## 🧪 Tests
 
 ```bash
-python test_orc.py
+pytest tests/ -v
 ```
 
-You will be prompted to enter your task, and the orchestrator will process it accordingly.
+**27 tests** across 3 modules:
+- `test_memory.py` — Memory manager (14 tests)
+- `test_orchestrator.py` — Pipeline integration (1 test)
+- `test_tools.py` — PDF, CSV, VRM tools (12 tests)
 
-### Testing API Connectivity
+---
 
-To ensure your Groq API key is set up correctly and the basic agent functionality is working, run:
+## 🛠️ Tech Stack
 
-```bash
-python test_planner.py
-```
+- **LLM**: Groq (LLaMA 3) — fast inference
+- **Orchestration**: LangGraph — state machine workflows
+- **API**: FastAPI + Uvicorn
+- **Frontend**: Vanilla HTML/CSS/JS dashboard
+- **Tools**: PyPDF, Pandas, DuckDuckGo Search
+- **Testing**: Pytest

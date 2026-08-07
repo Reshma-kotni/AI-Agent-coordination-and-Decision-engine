@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Audit Engine — Dashboard</title>
+  <meta name="description" content="Multi-agent contract and procurement audit monitoring dashboard with real-time pipeline visualization." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0a0d14;
+      --bg2:       #0f1420;
+      --bg3:       #151c2e;
+      --border:    rgba(99,179,237,0.12);
+      --accent:    #4f9eff;
+      --accent2:   #7c3aed;
+      --green:     #10b981;
+      --amber:     #f59e0b;
+      --red:       #ef4444;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --card-glow: 0 0 40px rgba(79,158,255,0.06);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background grid ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(79,158,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,158,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    /* ── Layout ── */
+    .layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; position: relative; z-index: 1; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh;
+    }
+    .logo { padding: 0 20px 28px; border-bottom: 1px solid var(--border); }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg,#4f9eff,#7c3aed); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 10px; }
+    .logo h1 { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+    .logo p  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .nav { padding: 20px 12px; flex: 1; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      transition: all 0.2s; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: var(--bg3); color: var(--text); }
+    .nav-item.active { background: rgba(79,158,255,0.12); color: var(--accent); }
+    .nav-item .icon { width: 18px; text-align: center; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+    .status-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+    /* ── Main ── */
+    main { padding: 32px; overflow-y: auto; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Page header ── */
+    .page-header { margin-bottom: 28px; }
+    .page-header h2 { font-size: 22px; font-weight: 700; }
+    .page-header p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Stat cards ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px; box-shadow: var(--card-glow); position: relative; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: rgba(79,158,255,0.25); }
+    .stat-card::after { content: ''; position: absolute; top: 0; right: 0; width: 60px; height: 60px; border-radius: 0 0 0 60px; opacity: 0.06; }
+    .stat-card.blue::after  { background: #4f9eff; }
+    .stat-card.purple::after { background: #7c3aed; }
+    .stat-card.green::after  { background: #10b981; }
+    .stat-card.amber::after  { background: #f59e0b; }
+    .stat-label  { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+    .stat-value  { font-size: 28px; font-weight: 800; line-height: 1; }
+    .stat-value.blue   { color: #4f9eff; }
+    .stat-value.purple { color: #a78bfa; }
+    .stat-value.green  { color: #10b981; }
+    .stat-value.amber  { color: #f59e0b; }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+    /* ── Grid layout ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; box-shadow: var(--card-glow);
+    }
+    .card h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .card h3 .badge { font-size: 10px; background: rgba(79,158,255,0.15); color: var(--accent); padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+
+    /* ── Pipeline visualizer ── */
+    .pipeline { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+    .pipe-node {
+      display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 14px;
+      border-radius: 10px; border: 1px solid var(--border); background: var(--bg3);
+      font-size: 11px; font-weight: 500; color: var(--muted); min-width: 80px; text-align: center;
+      transition: all 0.3s; position: relative;
+    }
+    .pipe-node .node-icon { font-size: 16px; }
+    .pipe-node.active { border-color: var(--accent); color: var(--accent); background: rgba(79,158,255,0.08); box-shadow: 0 0 16px rgba(79,158,255,0.2); }
+    .pipe-node.done   { border-color: var(--green); color: var(--green); background: rgba(16,185,129,0.08); }
+    .pipe-node.error  { border-color: var(--red);   color: var(--red);   background: rgba(239,68,68,0.08); }
+    .pipe-arrow { color: var(--muted); font-size: 14px; padding: 0 4px; flex-shrink: 0; }
+
+    /* ── Audit Form ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group textarea {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; color: var(--text); font-size: 13px; font-family: inherit;
+      transition: border-color 0.2s; outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,158,255,0.1); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .btn {
+      padding: 11px 24px; border-radius: 8px; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 600; transition: all 0.2s; font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; width: 100%;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(79,158,255,0.3); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px 16px; font-size: 12px; }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Score ring ── */
+    .score-ring-wrap { display: flex; align-items: center; gap: 24px; }
+    .score-ring { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .score-ring-text .score-num { font-size: 24px; font-weight: 800; }
+    .score-ring-text .score-lbl { font-size: 9px; color: var(--muted); }
+    .score-dims { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .score-dim { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .score-dim-label { width: 120px; color: var(--muted); }
+    .score-bar-wrap { flex: 1; height: 4px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+    .score-bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.8s ease; }
+    .score-dim-val { width: 32px; text-align: right; font-size: 11px; color: var(--muted); }
+
+    /* ── Result box ── */
+    .result-section { margin-top: 20px; }
+    .result-section h4 { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+    .result-text {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px; font-size: 12px; line-height: 1.7; font-family: 'JetBrains Mono', monospace;
+      max-height: 180px; overflow-y: auto; white-space: pre-wrap; color: #94a3b8;
+    }
+
+    /* ── Badges & pills ── */
+    .badge-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .badge-green  { background: rgba(16,185,129,0.15); color: var(--green); }
+    .badge-red    { background: rgba(239,68,68,0.15);  color: var(--red);   }
+    .badge-amber  { background: rgba(245,158,11,0.15); color: var(--amber); }
+    .badge-blue   { background: rgba(79,158,255,0.15); color: var(--accent); }
+    .badge-purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
+
+    /* ── Tables ── */
+    .table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .table th { text-align: left; padding: 8px 12px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    .table td { padding: 10px 12px; border-bottom: 1px solid rgba(99,179,237,0.05); vertical-align: top; }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover td { background: rgba(79,158,255,0.03); }
+
+    /* ── Risk pattern cards ── */
+    .pattern-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pattern-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+    .pattern-card h4 { font-size: 12px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .pattern-card p  { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Spinner ── */
+    .spinner { width: 20px; height: 20px; border: 2px solid rgba(79,158,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 20px; font-size: 13px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      transform: translateY(80px); opacity: 0; transition: all 0.3s;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ── Loader overlay ── */
+    #loader-overlay {
+      position: fixed; inset: 0; z-index: 500; background: rgba(10,13,20,0.85);
+      display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+    }
+    #loader-overlay.show { display: flex; }
+    .loader-ring { width: 56px; height: 56px; border: 3px solid rgba(79,158,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    #loader-text { font-size: 14px; color: var(--muted); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .pattern-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loader overlay -->
+<div id="loader-overlay">
+  <div class="loader-ring"></div>
+  <div id="loader-text">Running audit pipeline…</div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <h1>AI Audit Engine</h1>
+      <p>Multi-Agent v4.0</p>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" id="nav-overview" onclick="showPage('overview')">
+        <span class="icon">📊</span> Overview
+      </div>
+      <div class="nav-item" id="nav-run" onclick="showPage('run')">
+        <span class="icon">▶️</span> Run Audit
+      </div>
+      <div class="nav-item" id="nav-history" onclick="showPage('history', loadHistory)">
+        <span class="icon">📋</span> Audit History
+      </div>
+      <div class="nav-item" id="nav-vendors" onclick="showPage('vendors', loadVendors)">
+        <span class="icon">🏢</span> Vendors
+      </div>
+      <div class="nav-item" id="nav-patterns" onclick="showPage('patterns', loadPatterns)">
+        <span class="icon">⚠️</span> Risk Patterns
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="status-dot"></span> API Connected
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main>
+
+    <!-- ── Overview ── -->
+    <section class="page active" id="page-overview">
+      <div class="page-header">
+        <h2>Pipeline Overview</h2>
+        <p>Real-time metrics across all completed audit runs</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card blue">
+          <div class="stat-label">Total Audits</div>
+          <div class="stat-value blue" id="stat-total">—</div>
+          <div class="stat-sub">all time</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Pass Rate</div>
+          <div class="stat-value green" id="stat-pass">—</div>
+          <div class="stat-sub">validation</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-label">Avg Score</div>
+          <div class="stat-value purple" id="stat-score">—</div>
+          <div class="stat-sub">out of 100</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-label">Avg Duration</div>
+          <div class="stat-value amber" id="stat-duration">—</div>
+          <div class="stat-sub">seconds</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Pipeline graph -->
+        <div class="card" style="grid-column: span 2;">
+          <h3>🔄 Agent Pipeline <span class="badge">v4.0</span></h3>
+          <div class="pipeline" id="pipeline-viz">
+            <div class="pipe-node done" id="pn-memory_pre"><span class="node-icon">🧠</span>Memory Pre</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-planner"><span class="node-icon">📝</span>Planner</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-tool_router"><span class="node-icon">🔀</span>Tool Router</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-run_tools"><span class="node-icon">🛠️</span>Run Tools</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-research_agent"><span class="node-icon">🔍</span>Research</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-analyzer"><span class="node-icon">📊</span>Analyzer</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-review"><span class="node-icon">👁️</span>Review</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-decision"><span class="node-icon">⚖️</span>Decision</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-executor"><span class="node-icon">📄</span>Executor</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-evaluator"><span class="node-icon">🏆</span>Evaluator</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-memory_post"><span class="node-icon">💾</span>Memory Post</div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-node done" id="pn-validator"><span class="node-icon">✅</span>Validator</div>
+          </div>
+        </div>
+
+        <!-- Quality distribution -->
+        <div class="card">
+          <h3>🏅 Quality Distribution</h3>
+          <div id="quality-dist" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="color:var(--muted);font-size:13px;">Loading…</div>
+          </div>
+        </div>
+
+        <!-- Recent runs -->
+        <div class="card">
+          <h3>🕐 Recent Runs</h3>
+          <div id="recent-runs" style="font-size:13px;color:var(--muted);">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Run Audit ── -->
+    <section class="page" id="page-run">
+      <div class="page-header">
+        <h2>Run Audit</h2>
+        <p>Submit a contract audit task to the multi-agent pipeline</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>⚙️ Audit Configuration</h3>
+          <div class="form-group">
+            <label>Task Description *</label>
+            <textarea id="inp-task" placeholder="e.g. Audit the vendor contract from Initech Solutions for procurement risk and verify compliance status."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Vendor Name</label>
+            <input id="inp-vendor" type="text" placeholder="e.g. Acme Corp" />
+          </div>
+          <div class="form-group">
+            <label>Contract CSV Path</label>
+            <input id="inp-csv" type="text" placeholder="e.g. sample_contract.csv" />
+          </div>
+          <div class="form-group">
+            <label>Contract PDF Path</label>
+            <input id="inp-pdf" type="text" placeholder="e.g. sample_contract.pdf" />
+          </div>
+          <button class="btn btn-primary" id="btn-run" onclick="runAudit()">▶ Run Audit Pipeline</button>
+        </div>
+
+        <!-- Results panel -->
+        <div class="card" id="result-card">
+          <h3>📈 Audit Results</h3>
+          <div id="results-empty" style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center;">
+            Run an audit to see results here.
+          </div>
+          <div id="results-content" style="display:none;">
+
+            <!-- Score ring -->
+            <div class="score-ring-wrap" style="margin-bottom:20px;">
+              <div class="score-ring">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(79,158,255,0.1)" stroke-width="8"/>
+                  <circle id="score-circle" cx="50" cy="50" r="40" fill="none" stroke="url(#scoreGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
+                  <defs>
+                    <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#4f9eff"/>
+                      <stop offset="100%" stop-color="#7c3aed"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="score-ring-text">
+                  <div class="score-num" id="score-num">—</div>
+                  <div class="score-lbl" id="score-band">—</div>
+                </div>
+              </div>
+              <div class="score-dims" id="score-dims"></div>
+            </div>
+
+            <!-- Info pills -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="result-pills"></div>
+
+            <!-- Analysis -->
+            <div class="result-section">
+              <h4>Analysis</h4>
+              <div class="result-text" id="res-analysis">—</div>
+            </div>
+            <div class="result-section" style="margin-top:12px;">
+              <h4>Decision</h4>
+              <div class="result-text" id="res-decision">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── History ── -->
+    <section class="page" id="page-history">
+      <div class="page-header">
+        <h2>Audit History</h2>
+        <p>All completed audit pipeline runs</p>
+      </div>
+      <div class="card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th><th>Task</th><th>Vendor</th><th>Score</th><th>Duration</th><th>Status</th><th>Re-plan</th>
+            </tr>
+          </thead>
+          <tbody id="history-body">
+            <tr><td colspan="7" style="color:var(--muted);text-align:center;padding:24px;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Vendors ── -->
+    <section class="page" id="page-vendors">
+      <div class="page-header">
+        <h2>Vendor Profiles</h2>
+        <p>Long-term vendor risk intelligence from memory store</p>
+      </div>
+      <div id="vendor-grid" class="grid-3">
+        <div class="card" style="color:var(--muted);">Loading…</div>
+      </div>
+    </section>
+
+    <!-- ── Risk Patterns ── -->
+    <section class="page" id="page-patterns">
+      <div class="page-header">
+        <h2>Risk Pattern Library</h2>
+        <p>Known contract risk patterns and mitigations from the knowledge base</p>
+      </div>
+      <div class="pattern-grid" id="pattern-grid">
+        <div class="pattern-card" style="color:var(--muted);">Loading…</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  function showPage(name, loader) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+    if (loader) loader();
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+  function toast(msg, ok = true) {
+    const t = document.getElementById('toast');
+    t.textContent = (ok ? '✅ ' : '❌ ') + msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── Loader ────────────────────────────────────────────────────────────────
+  function showLoader(text = 'Running audit pipeline…') {
+    document.getElementById('loader-text').textContent = text;
+    document.getElementById('loader-overlay').classList.add('show');
+  }
+  function hideLoader() { document.getElementById('loader-overlay').classList.remove('show'); }
+
+  // ── Overview metrics ──────────────────────────────────────────────────────
+  async function loadOverview() {
+    try {
+      const res = await fetch(`${API}/metrics`);
+      const d = await res.json();
+      document.getElementById('stat-total').textContent    = d.total_runs ?? '0';
+      document.getElementById('stat-pass').textContent     = d.pass_rate_pct != null ? d.pass_rate_pct + '%' : '—';
+      document.getElementById('stat-score').textContent    = d.avg_audit_score ?? '—';
+      document.getElementById('stat-duration').textContent = d.avg_duration_s ?? '—';
+
+      // Quality dist
+      const dist = d.quality_distribution || {};
+      const total = d.total_runs || 1;
+      const bandColors = { EXCELLENT: 'green', GOOD: 'blue', ADEQUATE: 'amber', POOR: 'red' };
+      document.getElementById('quality-dist').innerHTML = Object.entries(dist).map(([band, count]) => `
+        <div style="display:flex;align-items:center;gap:10px;font-size:12px;">
+          <span style="width:70px;color:var(--muted);">${band}</span>
+          <div style="flex:1;height:6px;background:var(--bg3);border-radius:4px;overflow:hidden;">
+            <div style="width:${Math.round(count/total*100)}%;height:100%;background:var(--${bandColors[band]});border-radius:4px;transition:width 1s;"></div>
+          </div>
+          <span style="width:20px;text-align:right;">${count}</span>
+        </div>`).join('');
+    } catch (e) { console.warn('Metrics load failed', e); }
+
+    // Recent runs
+    try {
+      const hr = await fetch(`${API}/history`);
+      const hd = await hr.json();
+      const recent = (hd.records || []).slice(-5).reverse();
+      document.getElementById('recent-runs').innerHTML = recent.length
+        ? recent.map(r => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-size:12px;color:var(--text);">${(r.task || '').slice(0,50)}…</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">${r.timestamp?.slice(0,10)} · ${r.vendor_name || 'No vendor'}</div>
+            </div>
+            <span class="badge-pill badge-${r.validation_status === 'PASS' ? 'green' : 'red'}">${r.validation_status}</span>
+          </div>`).join('')
+        : '<div style="color:var(--muted);font-size:13px;padding:12px 0;">No audit runs yet.</div>';
+    } catch (e) { console.warn('History load failed', e); }
+  }
+
+  // ── Run audit ─────────────────────────────────────────────────────────────
+  async function runAudit() {
+    const task = document.getElementById('inp-task').value.trim();
+    if (!task || task.length < 10) { toast('Please enter a task description (min 10 chars).', false); return; }
+
+    const btn = document.getElementById('btn-run');
+    btn.disabled = true;
+    showLoader('Running multi-agent audit pipeline…');
+
+    const body = { task };
+    const vendor = document.getElementById('inp-vendor').value.trim();
+    const csv    = document.getElementById('inp-csv').value.trim();
+    const pdf    = document.getElementById('inp-pdf').value.trim();
+    if (vendor) body.vendor_name = vendor;
+    if (csv)    body.contract_csv_path = csv;
+    if (pdf)    body.contract_pdf_path = pdf;
+
+    try {
+      const res = await fetch(`${API}/audit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const d = await res.json();
+      renderResults(d);
+      toast('Audit completed successfully!');
+      loadOverview();
+    } catch (e) {
+      toast('Audit failed: ' + e.message, false);
+    } finally {
+      btn.disabled = false;
+      hideLoader();
+    }
+  }
+
+  function renderResults(d) {
+    document.getElementById('results-empty').style.display = 'none';
+    document.getElementById('results-content').style.display = 'block';
+
+    // Score ring animation
+    const score = d.audit_score ?? 0;
+    const circumference = 251;
+    const offset = circumference - (score / 100) * circumference;
+    document.getElementById('score-circle').style.strokeDashoffset = offset;
+    document.getElementById('score-num').textContent = score;
+    document.getElementById('score-band').textContent = d.audit_quality_band ?? '';
+
+    // Score dimensions
+    const bd = d.score_breakdown || {};
+    document.getElementById('score-dims').innerHTML = Object.entries(bd).map(([key, dim]) => `
+      <div class="score-dim">
+        <span class="score-dim-label">${key.replace(/_/g,' ')}</span>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${(dim.score/dim.max)*100}%"></div></div>
+        <span class="score-dim-val">${dim.score}/${dim.max}</span>
+      </div>`).join('');
+
+    // Pills
+    const valColor = d.validation_status === 'PASS' ? 'green' : 'red';
+    let pills = `<span class="badge-pill badge-${valColor}">${d.validation_status}</span>`;
+    if (d.re_plan_triggered) pills += `<span class="badge-pill badge-amber">🔄 Re-planned</span>`;
+    if ((d.tool_errors || []).length) pills += `<span class="badge-pill badge-red">⚠ ${d.tool_errors.length} Tool Error(s)</span>`;
+    if (d.vendor_risk_report) pills += `<span class="badge-pill badge-blue">🏢 VRM Checked</span>`;
+    document.getElementById('result-pills').innerHTML = pills;
+
+    document.getElementById('res-analysis').textContent = d.analysis || '—';
+    document.getElementById('res-decision').textContent = d.decision  || '—';
+
+    // Animate pipeline nodes
+    const visited = d.node_history || [];
+    document.querySelectorAll('.pipe-node').forEach(n => {
+      n.classList.remove('done', 'active');
+      const id = n.id.replace('pn-', '');
+      if (visited.includes(id)) n.classList.add('done');
+    });
+  }
+
+  // ── History ───────────────────────────────────────────────────────────────
+  async function loadHistory() {
+    try {
+      const res = await fetch(`${API}/history`);
+      const d   = await res.json();
+      const rows = (d.records || []).slice().reverse();
+      document.getElementById('history-body').innerHTML = rows.length
+        ? rows.map(r => `
+          <tr>
+            <td>${r.timestamp?.slice(0,16).replace('T',' ')}</td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.task || '—'}</td>
+            <td>${r.vendor_name || '—'}</td>
+            <td><span class="badge-pill badge-${r.audit_quality_band==='EXCELLENT'?'green':r.audit_quality_band==='GOOD'?'blue':r.audit_quality_band==='ADEQUATE'?'amber':'red'}">${r.audit_score ?? '—'} / 100</span></td>
+            <td>${r.total_duration_s ?? '—'}s</td>
+            <td><span class="badge-pill badge-${r.validation_status==='PASS'?'green':'red'}">${r.validation_status}</span></td>
+            <td>${r.re_plan_triggered ? '<span class="badge-pill badge-amber">Yes</span>' : '<span style="color:var(--muted)">No</span>'}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:24px;">No audit history found. Run your first audit!</td></tr>';
+    } catch (e) { console.warn(e); }
+  }
+
+  // ── Vendors ───────────────────────────────────────────────────────────────
+  async function loadVendors() {
+    try {
+      const res = await fetch(`${API}/vendors`);
+      const d   = await res.json();
+      const vendors = d.vendors || [];
+      const riskColor = { HIGH: 'red', MEDIUM: 'amber', LOW: 'green', UNKNOWN: 'muted' };
+      document.getElementById('vendor-grid').innerHTML = vendors.length
+        ? vendors.map(v => `
+          <div class="card">
+            <h3>🏢 ${v.vendor_name}</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;">
+              <div style="display:flex;justify-content:space-between;">
+                <span style="color:var(--muted)">Overall Risk</span>
+                <span class="badge-pill badge-${riskColor[v.overall_risk]||'blue'}">${v.overall_risk||'N/A'}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="color:var(--muted)">Last Audited</span>
+                <span>${v.last_audited||'Never'}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="color:var(--muted)">Audit Count</span>
+                <span>${v.audit_count||0}</span>
+              </div>
+            </div>
+          </div>`).join('')
+        : '<div class="card" style="color:var(--muted);">No vendor profiles yet. Run an audit with a vendor name.</div>';
+    } catch (e) { console.warn(e); }
+  }
+
+  // ── Risk Patterns ─────────────────────────────────────────────────────────
+  async function loadPatterns() {
+    try {
+      const res = await fetch(`${API}/risk-patterns`);
+      const d   = await res.json();
+      const sevColor = { HIGH:'red', MEDIUM:'amber', LOW:'green' };
+      document.getElementById('pattern-grid').innerHTML = (d.patterns || []).map(p => `
+        <div class="pattern-card">
+          <h4>
+            <span class="badge-pill badge-${sevColor[p.severity]||'blue'}">${p.severity}</span>
+            ${p.pattern}
+          </h4>
+          <p style="margin-bottom:6px;"><strong style="color:var(--text);">Keywords:</strong> ${(p.keywords||[]).join(', ')}</p>
+          <p><strong style="color:var(--text);">Mitigation:</strong> ${p.mitigation}</p>
+        </div>`).join('')
+        || '<div class="pattern-card" style="color:var(--muted);">No patterns found.</div>';
+    } catch (e) { console.warn(e); }
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  loadOverview();
+  setInterval(loadOverview, 30000); // refresh every 30s
+</script>
+</body>
+</html>
